@@ -35,6 +35,7 @@ port
 	clock_12     : in std_logic;
 	reset        : in std_logic;
 	
+	dn_clk       : in  std_logic;
 	dn_addr      : in  std_logic_vector(15 downto 0);
 	dn_data      : in  std_logic_vector(7 downto 0);
 	dn_wr        : in  std_logic;
@@ -358,10 +359,17 @@ port map(
 rom_cs <= '1' when dn_addr(15 downto 12) = "1100" else '0';
 
 -- program rom
-program_rom : work.dpram generic map (12)
+program_rom : entity work.dualport_2clk_ram
+generic map 
+(
+    FALLING_A    => true,
+    ADDR_WIDTH   => 12,
+    DATA_WIDTH   => 8
+   
+)
 port map
 (
-	clock_a   => clock_12,
+	clock_a   => dn_clk,
 	wren_a    => dn_wr and rom_cs,
 	address_a => dn_addr(11 downto 0),
 	data_a    => dn_data,
