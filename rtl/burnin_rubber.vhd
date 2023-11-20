@@ -725,7 +725,11 @@ romb1_cs <= '1' when dn_addr(15 downto 12) = "1010" else '0';
 romb2_cs <= '1' when dn_addr(15 downto 12) = "1011" else '0';
 
 -- working ram 
-wram : entity work.dualport_2clk_ram generic map(11)
+wram : entity work.dualport_2clk_ram generic map 
+(
+    ADDR_WIDTH   => 11,
+    DATA_WIDTH   => 8
+)
 port map(
 	clock_a   => clock_12,
 	wren_a    => hs_write_enable,
