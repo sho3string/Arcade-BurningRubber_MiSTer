@@ -34,7 +34,8 @@ port
 (
 	clock_12     : in std_logic;
 	reset        : in std_logic;
-	 
+	
+	dn_clk       : in std_logic; -- M2M rom loading
 	dn_addr      : in  std_logic_vector(15 downto 0);
 	dn_data      : in  std_logic_vector(7 downto 0);
 	dn_wr        : in  std_logic;
@@ -724,13 +725,17 @@ romb1_cs <= '1' when dn_addr(15 downto 12) = "1010" else '0';
 romb2_cs <= '1' when dn_addr(15 downto 12) = "1011" else '0';
 
 -- working ram 
-wram : entity work.dpram generic map(11)
+wram : entity work.dualport_2clk_ram generic map 
+(
+    ADDR_WIDTH   => 11,
+    DATA_WIDTH   => 8
+)
 port map(
 	clock_a   => clock_12,
 	wren_a    => hs_write_enable,
 	address_a => hs_address,
 	data_a    => hs_data_in,
-  q_a       => hs_data_out,
+    q_a       => hs_data_out,
 
 	clock_b   => clock_12n,
 	wren_b    => wram_we,
@@ -740,10 +745,17 @@ port map(
 );
 
 -- program rom
-program_rom : work.dpram generic map (14)
+program_rom : entity work.dualport_2clk_ram
+generic map 
+(
+    FALLING_A    => true,
+    ADDR_WIDTH   => 14,
+    DATA_WIDTH   => 8
+   
+)
 port map
 (
-	clock_a   => clock_12,
+	clock_a   => dn_clk,
 	wren_a    => dn_wr and romp_cs,
 	address_a => dn_addr(13 downto 0),
 	data_a    => dn_data,
@@ -776,10 +788,17 @@ port map(
 );
 
 -- foreground and sprite graphix rom bit #1
-fg_sp_graphx_1 : work.dpram generic map (13)
+fg_sp_graphx_1 : entity work.dualport_2clk_ram
+generic map 
+(
+    FALLING_A    => true,
+    ADDR_WIDTH   => 13,
+    DATA_WIDTH   => 8
+   
+)
 port map
 (
-	clock_a   => clock_12,
+	clock_a   => dn_clk,
 	wren_a    => dn_wr and roms1_cs,
 	address_a => dn_addr(12 downto 0),
 	data_a    => dn_data,
@@ -790,10 +809,17 @@ port map
 );
 
 -- foreground and sprite graphix rom bit #2
-fg_sp_graphx_2 : work.dpram generic map (13)
+fg_sp_graphx_2 : entity work.dualport_2clk_ram
+generic map 
+(
+    FALLING_A    => true,
+    ADDR_WIDTH   => 13,
+    DATA_WIDTH   => 8
+   
+)
 port map
 (
-	clock_a   => clock_12,
+	clock_a   => dn_clk,
 	wren_a    => dn_wr and roms2_cs,
 	address_a => dn_addr(12 downto 0),
 	data_a    => dn_data,
@@ -804,10 +830,17 @@ port map
 );
 
 -- foreground and sprite graphix rom bit #3
-fg_sp_graphx_3 : work.dpram generic map (13)
+fg_sp_graphx_3 : entity work.dualport_2clk_ram
+generic map 
+(
+    FALLING_A    => true,
+    ADDR_WIDTH   => 13,
+    DATA_WIDTH   => 8
+   
+)
 port map
 (
-	clock_a   => clock_12,
+	clock_a   => dn_clk,
 	wren_a    => dn_wr and roms3_cs,
 	address_a => dn_addr(12 downto 0),
 	data_a    => dn_data,
@@ -851,10 +884,17 @@ port map(
 );
 
 -- background graphix rom bit #3&2
-bg_graphx_1 : work.dpram generic map (12)
+bg_graphx_1 : entity work.dualport_2clk_ram
+generic map 
+(
+    FALLING_A    => true,
+    ADDR_WIDTH   => 12,
+    DATA_WIDTH   => 8
+   
+)
 port map
 (
-	clock_a   => clock_12,
+	clock_a   => dn_clk,
 	wren_a    => dn_wr and romb1_cs,
 	address_a => dn_addr(11 downto 0),
 	data_a    => dn_data,
@@ -865,10 +905,17 @@ port map
 );
 
 -- background graphix rom bit #1
-bg_graphx_2 : work.dpram generic map (12)
+bg_graphx_2 : entity work.dualport_2clk_ram
+generic map 
+(
+    FALLING_A    => true,
+    ADDR_WIDTH   => 12,
+    DATA_WIDTH   => 8
+   
+)
 port map
 (
-	clock_a   => clock_12,
+	clock_a   => dn_clk,
 	wren_a    => dn_wr and romb2_cs,
 	address_a => dn_addr(11 downto 0),
 	data_a    => dn_data,
@@ -884,6 +931,7 @@ port map(
 	clock_12  => clock_12 and not paused,
 	reset     => reset,
 	
+	dn_clk    => dn_clk,
 	dn_addr   => dn_addr,
 	dn_data   => dn_data,
 	dn_wr     => dn_wr,
